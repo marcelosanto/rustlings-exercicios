@@ -31,8 +31,25 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
         // Keep in mind that goals scored by team 1 will be the number of goals
         // conceded by team 2. Similarly, goals scored by team 2 will be the
         // number of goals conceded by team 1.
-    }
 
+        scores
+            .entry(team_1_name.trim_start())
+            .and_modify(|e| e.goals_conceded += team_2_score)
+            .and_modify(|x| x.goals_scored += team_1_score)
+            .or_insert(TeamScores {
+                goals_scored: team_1_score,
+                goals_conceded: team_2_score,
+            });
+
+        scores
+            .entry(team_2_name.trim_start())
+            .and_modify(|e| e.goals_conceded += team_1_score)
+            .and_modify(|x| x.goals_scored += team_2_score)
+            .or_insert(TeamScores {
+                goals_scored: team_2_score,
+                goals_conceded: team_1_score,
+            });
+    }
     scores
 }
 
@@ -45,10 +62,10 @@ mod tests {
     use super::*;
 
     const RESULTS: &str = "England,France,4,2
-France,Italy,3,1
-Poland,Spain,2,0
-Germany,England,2,1
-England,Spain,1,0";
+    France,Italy,3,1
+    Poland,Spain,2,0
+    Germany,England,2,1
+    England,Spain,1,0";
 
     #[test]
     fn build_scores() {
